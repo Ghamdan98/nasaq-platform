@@ -1,0 +1,1 @@
+<tr><td class="header"><a href="{{ app(\App\Services\SystemSettingsService::class)->get('branding.website') ?: config('app.url') }}">{{ app(\App\Services\SystemSettingsService::class)->get('branding.name_ar') }}</a></td></tr>

@@ -1,0 +1,193 @@
+@import 'tailwindcss';
+
+:root {
+  font-family: var(--font-ar, Tahoma), var(--font-en, Arial), sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--color-text, #0f172a);
+  background: var(--color-background, #f1f5f9);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-background, #f1f5f9);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+input:not([type='checkbox']):not([type='radio']),
+select {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-slate-200);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-slate-400);
+  border-radius: 999px;
+}
+
+.print-section-title {
+  margin: 1.25rem 0 0.5rem;
+  border-bottom: 1px solid var(--color-slate-300);
+  padding-bottom: 0.4rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.print-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.25rem 1rem;
+}
+
+.print-info-grid p {
+  margin: 0.2rem 0;
+}
+
+.print-table,
+.print-signatures {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.print-table th,
+.print-table td,
+.print-signatures th,
+.print-signatures td {
+  border: 1px solid var(--color-slate-300);
+  padding: 0.45rem;
+  vertical-align: top;
+}
+
+.print-table th,
+.print-signatures th {
+  background: var(--color-blue-50);
+  text-align: right;
+}
+
+.print-totals {
+  margin-top: 1rem;
+  border: 1px solid var(--color-blue-200);
+  background: var(--color-blue-50);
+  padding: 0.75rem 1rem;
+}
+
+.print-totals p {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.25rem 0;
+}
+
+.print-net {
+  color: var(--color-primary);
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.print-warning {
+  margin: 0.35rem 0;
+  border-right: 3px solid var(--color-warning);
+  background: var(--color-amber-50);
+  padding: 0.5rem;
+}
+
+.print-footer {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 14mm 12mm;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: auto;
+    background: #fff !important;
+  }
+
+  body {
+    color: #111827;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .no-print,
+  aside,
+  button {
+    display: none !important;
+  }
+
+  .print-route,
+  .print-document {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: #111827 !important;
+    background: #fff !important;
+  }
+
+  .print-section-title {
+    break-after: avoid-page;
+  }
+
+  .print-table thead {
+    display: table-header-group;
+  }
+
+  .print-table tr,
+  .print-keep,
+  .print-signatures {
+    break-inside: avoid;
+  }
+
+  .print-totals {
+    break-inside: avoid;
+  }
+
+  .print-footer {
+    display: block;
+    margin-top: 1rem;
+    border-top: 1px solid var(--color-slate-300);
+    padding-top: 0.4rem;
+    color: var(--color-slate-500);
+    font-size: 0.75rem;
+  }
+}

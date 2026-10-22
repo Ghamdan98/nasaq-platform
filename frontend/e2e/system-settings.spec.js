@@ -1,0 +1,73 @@
+import { test, expect } from '@playwright/test'
+
+test('developer theme branding upload survives refresh, administrator denied, cancel and reset are safe', async ({ browser, request }) => {
+  test.setTimeout(120000)
+  const api = process.env.FINANCE_API_URL || 'http://127.0.0.1:8001/api'
+  if (!process.env.E2E_DEVELOPER_PASSWORD) throw new Error('Set a temporary E2E_DEVELOPER_PASSWORD for the isolated fixture.')
+  const login = await request.post(`${api}/auth/login`, { data: { email: 'developer-e2e@example.test', password: process.env.E2E_DEVELOPER_PASSWORD } })
+  expect(login.status()).toBe(200)
+  const auth = await login.json()
+  const headers = { Authorization: `Bearer ${auth.token}`, Accept: 'application/json' }
+  const before = await request.get(`${api}/developer/settings`, { headers }); const original = await before.json()
+  let page
+  try {
+    page = await browser.newPage()
+    await page.addInitScript(({ token,user }) => { localStorage.setItem('auth_token',token); localStorage.setItem('user',JSON.stringify(user)) },auth)
+    await page.route('**/api/**',async route => { const url=new URL(route.request().url()); const response=await route.fetch({url:api+url.pathname.replace(/^\/api/,'')+url.search}); await route.fulfill({response}) })
+    await page.goto((process.env.E2E_BASE_URL || 'http://127.0.0.1:5173')+'/#/developer/settings')
+    await page.getByLabel('اسم النظام بالعربية',{exact:true}).fill('هوية اختبار مركزية')
+    await page.getByLabel('اسم النظام بالإنجليزية',{exact:true}).fill('Central Brand Test')
+    // Generate a validated PNG through the browser canvas instead of relying on a fixture image.
+    const png=await page.evaluate(() => { const canvas=document.createElement('canvas'); canvas.width=32; canvas.height=32; const context=canvas.getContext('2d'); context.fillStyle='#7c3aed'; context.fillRect(0,0,32,32); return canvas.toDataURL('image/png').split(',')[1] })
+    const uploading=page.waitForResponse(response=>response.url().endsWith('/developer/branding/upload'))
+    await page.getByLabel('رفع الشعار الرئيسي',{exact:true}).setInputFiles({name:'brand.png',mimeType:'image/png',buffer:Buffer.from(png,'base64')})
+    const uploaded=await uploading
+    expect(uploaded.status()).toBe(201)
+    const uploadBody=await uploaded.text()
+    expect(() => JSON.parse(uploadBody),uploadBody.slice(0,1200)).not.toThrow()
+    const assetId=JSON.parse(uploadBody).id
+    await page.getByRole('tab',{name:'الألوان والمظهر',exact:true}).click()
+    await page.getByLabel('اللون الأساسي HEX',{exact:true}).fill('#7c3aed')
+    await page.getByLabel('وضع المظهر',{exact:true}).selectOption('dark')
+    await page.getByRole('button',{name:'معاينة',exact:true}).click()
+    await expect(page.locator('html')).toHaveAttribute('data-theme','dark')
+    await page.getByLabel('وضع المظهر',{exact:true}).selectOption('light')
+    await page.getByRole('button',{name:'معاينة',exact:true}).click()
+    await expect(page).toHaveTitle('هوية اختبار مركزية')
+    expect(await page.evaluate(()=>document.documentElement.style.getPropertyValue('--color-primary'))).toBe('#7c3aed')
+    await page.getByLabel('سبب التعديل',{exact:true}).fill('اختبار حفظ الهوية والثيم المركزي')
+    const saving=page.waitForResponse(response=>response.url().endsWith('/developer/settings') && response.request().method()==='PUT')
+    await page.getByRole('button',{name:'حفظ التغييرات',exact:true}).click()
+    const saved=await saving
+    expect(saved.status()).toBe(200)
+    expect((await saved.json()).settings['branding.logo']).toBe(assetId)
+    await page.reload()
+    await expect(page).toHaveTitle('هوية اختبار مركزية')
+    await expect(page.getByRole('heading',{name:'Central Brand Test',exact:true})).toBeVisible()
+    await expect(page.locator('.system-logo').first()).toHaveAttribute('src',/\/system\/branding\//)
+    await page.screenshot({path:'test-results/system-settings-desktop.png'})
+    await page.getByRole('tab',{name:'الألوان والمظهر',exact:true}).click()
+    await page.getByLabel('اللون الأساسي HEX',{exact:true}).fill('#b91c1c')
+    await page.getByRole('button',{name:'معاينة',exact:true}).click()
+    await page.getByRole('button',{name:'إلغاء التغييرات',exact:true}).click()
+    expect(await page.evaluate(()=>document.documentElement.style.getPropertyValue('--color-primary'))).toBe('#7c3aed')
+    await page.getByRole('tab',{name:'حالة الخدمات',exact:true}).click()
+    await page.getByRole('button',{name:'فحص حالة الخدمات',exact:true}).click()
+    await expect(page.getByText('قاعدة البيانات',{exact:true})).toBeVisible()
+    await page.setViewportSize({width:390,height:844})
+    await page.getByRole('button',{name:'استعادة الإعدادات الافتراضية',exact:true}).click()
+    await expect(page.getByRole('button',{name:'تأكيد استعادة الافتراضي',exact:true})).toBeDisabled()
+    await page.getByLabel('تأكيد استعادة الافتراضي').fill('RESET')
+    await page.getByLabel('سبب التعديل',{exact:true}).fill('اختبار استعادة الإعدادات الافتراضية فقط')
+    const resetting=page.waitForResponse(response=>response.url().endsWith('/settings/reset'))
+    await page.getByRole('button',{name:'تأكيد استعادة الافتراضي',exact:true}).click()
+    expect((await resetting).status()).toBe(200)
+    const adminLogin=await request.post(`${api}/auth/login`,{data:{email:'finance-e2e@example.test',password:'FinanceE2E123!'}})
+    const admin=await adminLogin.json()
+    expect((await request.get(`${api}/developer/settings`,{headers:{Authorization:`Bearer ${admin.token}`}})).status()).toBe(403)
+  } finally {
+    await page?.close()
+    const latest=await (await request.get(`${api}/developer/settings`,{headers})).json()
+    await request.put(`${api}/developer/settings`,{headers,data:{settings:original.settings,revision:latest.revision,reason:'إعادة إعدادات الاختبار السابقة بعد التحقق'}})
+  }
+})

@@ -1,0 +1,188 @@
+.app-shell {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f7fafc 0%, #edf4ff 100%);
+}
+
+.panel {
+  padding: 32px;
+}
+
+.side-panel {
+  background: #0f172a;
+  color: #f8fafc;
+}
+
+.side-panel h1 {
+  margin: 0 0 12px;
+  font-size: 2.1rem;
+  line-height: 1.2;
+  color: #f8fafc;
+}
+
+.subtitle {
+  color: #cbd5e1;
+  margin-bottom: 28px;
+}
+
+.auth-form,
+.calc-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auth-form h2,
+.main-panel h2,
+.result-card h3 {
+  margin: 0 0 8px;
+  color: #0f172a;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.92rem;
+  color: inherit;
+}
+
+input {
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 1rem;
+  background: #fff;
+}
+
+button {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+button:hover {
+  opacity: 0.92;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.auth-form button,
+.primary {
+  background: #2563eb;
+  color: white;
+  margin-top: 8px;
+}
+
+.user-card {
+  margin-top: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  border-radius: 16px;
+  padding: 18px;
+  background: rgba(15, 23, 42, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.badge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #1d4ed8;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.main-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  color: #2563eb;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  font-size: 0.72rem;
+  margin: 0 0 6px;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.result-card,
+.message-box {
+  border-radius: 18px;
+  padding: 18px;
+  background: #fff;
+  border: 1px solid #dbeafe;
+}
+
+.message-box {
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.totals {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(200px, 1fr));
+  gap: 18px;
+  margin-top: 16px;
+}
+
+.totals div {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.totals span {
+  color: #475569;
+}
+
+.totals strong {
+  font-size: 1.2rem;
+  color: #0f172a;
+}
+
+.breakdown {
+  margin-top: 16px;
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 900px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .field-grid,
+  .totals {
+    grid-template-columns: 1fr;
+  }
+}
